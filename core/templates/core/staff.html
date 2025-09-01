@@ -1,0 +1,87 @@
+{% extends 'core/blocks/base.html' %}
+{% block content %}
+<!-- Add New Staff Toggle Button -->
+
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <h1 class="logo-text" style="margin: 0 auto; flex: 1; text-align: center;">Staff Management</h1>
+    <button class="submit" onclick="toggleForm()" id="toggleBtn" style="margin-left: 24px; padding: 8px 18px; font-size: 1rem; border-radius: 6px; width:150px;">Add New Staff</button>
+</div>
+<!-- Add New Staff Form (Initially Hidden) -->
+<div id="staffForm" style="display: none; margin-top: 20px;">
+    <h3>Add New Staff</h3>
+    <form method="POST" id="staffFormElement">
+        {% csrf_token %}
+        <label>Username:</label><br>
+        <input type="text" name="username" required><br>
+
+        <label>Password:</label><br>
+        <input type="password" name="password" required><br>
+
+        <label>Phone Number:</label><br>
+        <input type="text" name="phone1" required><br>
+
+        <label>Role:</label><br>
+        <select name="role" required>
+            <option value="">-- Select Staff type --</option>
+            <option value="weaver">Weaver</option>
+            <option value="warper">Warper</option>
+        </select><br><br>
+        <label>Staff Address</label>
+    <textarea name="address" required></textarea><br>
+        <button type="submit">Add Staff</button>
+        <br><br>
+        <br><br>
+    </form>
+</div>
+
+
+<!-- Staff Table -->
+<h3>All Staff</h3>
+{% if staff_members %}
+<table border="1" cellpadding="8" class="note-table">
+    <thead><tr>
+        <th>Username</th>
+        <th>Phone</th>
+        <th>Role</th>
+        <th>Email</th>
+        <th>Address</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for staff in staff_members %}
+    <tr>
+        <td>{{ staff.user.username }}</td>
+        <td>{{ staff.user.phone1 }}</td>
+        <td>{{ staff.role }}</td>
+        <td>{{ staff.user.email }}</td>
+        <td>{{ staff.user.address }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No staff members added yet.</p>
+{% endif %}
+
+<!-- JavaScript -->
+<script>
+    function toggleForm() {
+        const formDiv = document.getElementById("staffForm");
+        const btn = document.getElementById("toggleBtn");
+
+        if (formDiv.style.display === "none") {
+            formDiv.style.display = "block";
+            btn.style.display = "none";
+        } else {
+            formDiv.style.display = "none";
+            btn.style.display = "block";
+        }
+    }
+
+    // Auto-hide the form after submission
+    document.getElementById("staffFormElement")?.addEventListener("submit", () => {
+        document.getElementById("staffForm").style.display = "none";
+        document.getElementById("toggleBtn").innerText = "Add New Staff";
+    });
+</script>
+{% endblock %}

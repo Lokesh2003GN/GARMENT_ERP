@@ -1,0 +1,26 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Warp List{% endblock %}
+
+{% block content %}
+<table border="1" cellspacing="0" cellpadding="8" class="note-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Design</th>
+            <th>Meter</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for warp in warpes %}
+        <tr>
+            <td>{{ warp.name }}</td>
+            <td>{{ warp.design }}</td>
+            <td>{{ warp.meters }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No pending warps.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Assign Weaver</h1>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label for="weaver_select">Weaver</label>
+    <select name="weaver_select">
+        <option value="">-- Select Weaver --</option>
+        {% for staff in weavers %}
+            <option value="{{ staff.user.id }}">
+                {{ staff.user.username }}
+            </option>
+        {% endfor %}
+    </select>
+
+
+    <label for="date_start_weaver">Date Start (Warper)</label>
+    <input type="date" name="date_start_weaver">
+
+    <label for="length">Length</label>
+    <input type="number" step="0.01" name="length">
+
+
+
+
+    <hr>
+
+    <h2>Wage Info</h2>
+    {% if wage_list.exists %}
+        {% for wage in wage_list %}
+            <p><strong>Date:</strong> {{ wage.date }}</p>
+            <label>Good: <input type="number" step="0.01" name="wage_good" ></label><br>
+            <label>Damaged: <input type="number" step="0.01" name="wage_demage"></label><br>
+            <label>Extra: <input type="number" step="0.01" name="wage_extra"></label><br>
+        {% endfor %}
+    {% else %}
+        <label>Good: <input type="number" step="0.01" name="wage_good"></label><br>
+        <label>Damaged: <input type="number" step="0.01" name="wage_demage"></label><br>
+        <label>Extra: <input type="number" step="0.01" name="wage_extra"></label><br>
+    {% endif %}
+
+    <button type="submit">Assign Weaver</button>
+
+</form>
+
+{% endblock %}

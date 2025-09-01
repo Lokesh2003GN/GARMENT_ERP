@@ -1,0 +1,31 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %} Edit Warp {% endblock %}
+{% block content %}
+<h2>Add wage</h2>
+
+
+<form id="wage-form" method="POST" action="{% url 'add_wage' %}">
+    {% csrf_token %}
+    <label>Date</label>
+    <input type="date" id="date" name="date" required>
+    
+    <label>Select Existing staff</label>
+    <select name="staff_select" id="staff_select" required>
+        <option value="">-- Select staff --</option>
+        {% for s in staff %}
+            <option value="{{ s.user.id }}">{{ s.user.username }} ({{ s.user.staff.role }})</option>
+        {% endfor %}
+    </select>
+    
+    <label>Amount</label>
+    <input type="number" step="0.01" name="amount" required>
+    <label>Note</label>
+    <input type="text" name="note">
+    <br><br>
+    <button type="submit">Save wage</button>
+</form>
+
+<script>
+    document.getElementById('date').valueAsDate = new Date();
+</script>
+ {% endblock %}

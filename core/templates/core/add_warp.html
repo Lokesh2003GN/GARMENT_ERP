@@ -1,0 +1,164 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %} Add New Warp {% endblock %}
+{% block content %}
+   
+<h2>Add New Warp</h2>
+
+<form id="warp-form" method="POST" action="{% url 'add_warp' %}">
+    {% csrf_token %}
+        <label>Select Existing weaver</label>
+        <select name="weaver_select" id="company_select">
+            <option value="">-- Select weaver --</option>
+            {% for c in weavers %}
+                <option value="{{ c.user.id }}">{{ c.user.username }}</option>
+            {% endfor %}
+        </select>
+
+
+<label>Warp Name</label>
+<input type="text" name="name"placeholder="Enter Warp Name">
+<div class="form-row">
+    <div class="form-group">
+        <label>Color 1</label>
+        <input type="color" id="color1">
+    </div>
+    <div class="form-group">
+        <label>Color 2</label>
+        <input type="color" id="color2">
+    </div>
+    <div class="form-group">
+        <label>Preview</label>
+        <div id="color-preview" ></div>
+    </div>
+</div>
+    <label>Meters</label>
+    <input placeholder="Total Meters " type="number" step="0.01" name="meters" required>
+<div class="form-row">
+     <label>Yarn per 100 meters</label>
+     <input placeholder="Yarn per 100 meters" type="number" step="0.01" name="yarn" required>
+    <div class="form-group">
+    <label>Good wage</label>
+    <input type="number" step="0.01" name="wage_good" required>
+    </div>
+    <div class="form-group">
+    <label>Demage wage</label>
+    <input type="number" step="0.01" name="wage_demage" required>
+    </div>
+    <div class="form-group">
+    <label>Extra wage</label>
+    <input type="number" step="0.01" name="wage_extra" required>
+    </div>
+</div>
+        
+
+    <label>Starting Date</label>
+    <input placeholder="Select Start Date" type="date" id="date" name="date_start" required>
+
+    <label>Length</label>
+    <input placeholder="Enter Length of One Peace" type="number" step="0.01" name="length" required>
+    
+    
+    <button type="submit">Save</button>
+</form>
+<script>
+  document.getElementById('date').valueAsDate = new Date();
+    const form = document.getElementById('warp-form');
+
+    const companySelect = document.getElementById('company_select');
+    const companyText = document.getElementById('company_text');
+    const cardSelect = document.getElementById('card_select');
+    const cardText = document.getElementById('card_text');
+
+    form.addEventListener('submit', function (e) {
+        const companySelected = companySelect.value.trim();
+        const companyTyped = companyText.value.trim();
+        const cardSelected = cardSelect.value.trim();
+        const cardTyped = cardText.value.trim();
+
+        if (!companySelected && !companyTyped) {
+            alert("Please either select or enter a company.");
+            e.preventDefault();
+            return;
+        }
+
+        if (companySelected && companyTyped) {
+            alert("Please choose either existing or new company, not both.");
+            e.preventDefault();
+            return;
+        }
+
+        
+    });
+
+    // Disable company select/text if other is filled
+    companySelect.addEventListener('change', () => {
+        companyText.disabled = !!companySelect.value;
+    });
+    companyText.addEventListener('input', () => {
+        companySelect.disabled = !!companyText.value.trim();
+    });
+
+    // Disable card select/text if other is filled
+    cardSelect.addEventListener('change', () => {
+        cardText.disabled = !!cardSelect.value;
+    });
+    cardText.addEventListener('input', () => {
+        cardSelect.disabled = !!cardText.value.trim();
+    });
+
+    // Initialize disabling logic
+    companySelect.dispatchEvent(new Event('change'));
+    companyText.dispatchEvent(new Event('input'));
+    cardSelect.dispatchEvent(new Event('change'));
+    cardText.dispatchEvent(new Event('input'));
+    
+    
+    
+
+  const color1 = document.getElementById('color1');
+  const color2 = document.getElementById('color2');
+  const preview = document.getElementById('color-preview');
+
+  function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    return {
+      r: (bigint >> 16) & 255,
+      g: (bigint >> 8) & 255,
+      b: bigint & 255
+    };
+  }
+
+  function blendRgbWithAlpha(fg, bg) {
+    return {
+      r: Math.round(fg.r*0.5 + bg.r*0.5),
+      g: Math.round(fg.g*0.5 + bg.g*0.5),
+      b: Math.round(fg.b*0,5 + bg.b*0.5)
+    };
+  }
+
+  function rgbToCss(rgb) {
+    return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  }
+
+  function updatePreview() {
+    const val1 = color1.value;
+    const val2 = color2.value;
+
+    if (val1 && (!val2 || val1 === val2)) {
+      preview.style.background = val1;
+    } else if (val1 && val2) {
+      const rgb1 = hexToRgb(val1); // top color
+      const rgb2 = hexToRgb(val2); // bottom color
+      const blended = blendRgbWithAlpha(rgb1, rgb2, 0.5);
+      preview.style.background = rgbToCss(blended);
+    }
+  }
+
+  color1.addEventListener('input', updatePreview);
+  color2.addEventListener('input', updatePreview);
+  updatePreview();
+
+</script>
+
+
+ {% endblock %}

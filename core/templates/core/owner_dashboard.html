@@ -1,0 +1,106 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %} Home {% endblock %}
+{% block content %}
+   
+    <div class="page-wrapper">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <i class="fas fa-industry logo-icon"></i>
+                    <br>
+                    <h1 class="logo-text">Weaving Mills Management System</h1>
+                </div>
+                <div class="user-section">
+                    <div class="welcome-message">
+                        <span class="greeting">Welcome back,</span>
+                        <strong class="username">{{ request.user.username }}</strong>
+                    </div>
+                    <a href="{% url 'logout' %}" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+<br><br>
+<br><br>
+
+                <!-- Navigation Cards Section -->
+                <section class="navigation-section">
+                    <div class="card-grid">
+
+
+
+                        <a href="/yarn_management/" class="nav-card">
+                            <div class="card-icon">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Yarn Management</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                        <a href="/warp_management/" class="nav-card">
+                            <div class="card-icon">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Warp Management</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                                                <a href="/piece_management/" class="nav-card">
+                            <div class="card-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Piece Management</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                        <a href="/staff_management" class="nav-card">
+                            <div class="card-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Staff Management</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        <a href="/transactions/" class="nav-card">
+                            <div class="card-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Transactions</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 Weaving Mills Management System. Empowering textile excellence.</p>
+            </div>
+        </footer>
+    </div>
+ {% endblock %}

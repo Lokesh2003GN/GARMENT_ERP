@@ -1,0 +1,76 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Warp Design</h1>
+<table border="1" cellpadding="6" cellspacing="0" class="note-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Total Lint</th>
+          <th>preview</th>
+          <th>Edit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for warp_design in warp_designs %}
+<tr onclick="toggleDetails({{ forloop.counter0 }})">
+  <td>{{ warp_design.name }}</td>
+  <td>{{ warp_design.total_lint }}</td>
+  <td class="length">
+    <div style="display: flex; width: 100%; height: 20px; border: 1px solid #ccc;">
+      {% for entry in warp_design.entry_dict.values %}
+        {% widthratio entry.lint_count warp_design.total_lint 100 as percent %}
+        <div style="width:{{ percent }}%; background-color: {{ entry.color }};" title="Lint: {{ entry.lint_count }}"></div>
+      {% endfor %}
+    </div>
+  </td>
+  <td><button class="remove-btn" onclick="editWarpDesign({{ warp_design.id }})">Edit</button></td>
+</tr>
+
+<!-- Hidden details row -->
+<tr id="details-{{ forloop.counter0 }}" style="display:none;">
+  <td colspan="4">
+    <table style="width:100%; border: 1px solid #ccc;">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Color</th>
+          <th>Count</th>
+          <th>Lint</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in warp_design.entry_dict.values %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ entry.yarn.color }}</td>
+          <td>{{ entry.yarn.count }}</td>
+          <td>{{ entry.lint_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </td>
+</tr>
+{% endfor %}
+
+
+      </tbody>
+    </table>
+
+<script>
+  function editWarpDesign(warpDesignId) {
+    window.location.href = `/edit_warp_design/${warpDesignId}/`;
+}
+  function toggleDetails(index) {
+    const row = document.getElementById('details-' + index);
+    if (row.style.display === 'none') {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  }
+</script>
+
+{% endblock %}

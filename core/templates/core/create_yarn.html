@@ -1,0 +1,14 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %} Edit Warp {% endblock %}
+{% block content %}
+<h1>Create Yarn</h1>
+<form id="yarn-form" method="POST" action="{% url 'create_yarn' %}">
+    {% csrf_token %}
+    <label for="color">Color</label>
+    <input type="text" name="color" id="color" required>
+    
+    <label for="count">Count</label>
+    <input type="number" name="count" id="count" required>
+    
+    <button type="submit">Create Yarn</button>
+{% endblock %}

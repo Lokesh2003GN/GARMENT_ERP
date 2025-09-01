@@ -1,0 +1,126 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block content %}
+<h1>Warp-wise Piece List</h1>
+<div class="type-reference">
+  <div class="color good">Good</div>
+  <div class="color demage">Demage</div>
+  <div class="color extra">Extra</div>
+  <div class="color return">Return</div>
+</div>
+
+{% if request.user.staff.role == 'weaver' %}
+{% else %}
+  <form method="get" action="" id="weaver_form">
+    <label>Select Weaver:</label>
+    <select name="weaver_id" onchange="this.form.submit()" required>
+      <option value="">-- Select Weaver --</option>
+      {% for weaver in weavers %}
+        <option value="{{ weaver.user.id }}" {% if request.GET.weaver_id == weaver.user.id|stringformat:"s" %}selected{% endif %}>
+          {{ weaver.user.username }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+{% endif %}
+
+{% if selected_weaver %}
+  {% for warp_id, data in totals.items %}
+    {% with warp=warp_map|get_item:warp_id %}
+      <h2>
+        Meter: {{ warp.meters }} |
+        Name: {{ warp.name }} |
+        Total Meter: {{ data.total_meter }} |
+        Total Pieces: {{ data.total_peace }}
+      </h2>
+<div class="table-wrapper">
+  
+
+      <table border="1" cellpadding="5"
+             class="note-table piece-table {% if warp.isComplected %}completed{% endif %}"
+             data-warp-id="{{ warp.id }}">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Count</th>
+            <th>Length</th>
+            <th>Meters</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% with pieces=grouped_pieces|get_item:warp_id %}
+            {% for piece in pieces %}
+              <tr class="{{ piece.type }}">
+                <td>{{ piece.date }}</td>
+                <td class="count">{{ piece.count }}</td>
+                <td class="length">{{ piece.length }}</td>
+                <td class="meter">{{ piece.calculated_meter }}</td>
+                
+              </tr>
+            {% endfor %}
+          {% endwith %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Total</th>
+            <td class="total-count">0</td>
+            <td></td>
+            <td class="total-meter">0</td>
+            
+          </tr>
+          <tr>
+            <th>Remaining</th>
+            <td class="remaining-count">0</td>
+            <td></td>
+            <td class="remaining-meter">0</td>
+            
+          </tr>
+        </tfoot>
+      </table>
+      </div>
+      <br>
+    {% endwith %}
+  {% endfor %}
+{% elif request.GET.weaver_id %}
+  <p style="color:red;">No data found for selected weaver.</p>
+{% endif %}
+
+{{ totals|json_script:"totals-data" }}
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+  const totals = JSON.parse(document.getElementById('totals-data').textContent);
+
+  document.querySelectorAll(".piece-table").forEach((table) => {
+    let totalCount = 0;
+    let totalMeter = 0;
+
+    table.querySelectorAll("tbody tr").forEach((row) => {
+      if (row.classList.contains('return')) return; // Skip rows with type = 'return'
+
+      const count = parseFloat(row.querySelector(".count")?.innerText) || 0;
+      const meter = parseFloat(row.querySelector(".meter")?.innerText) || 0;
+
+      totalCount += count;
+      totalMeter += meter;
+    });
+
+    table.querySelector(".total-count").innerText = totalCount.toFixed(2);
+    table.querySelector(".total-meter").innerText = totalMeter.toFixed(2);
+
+    const warpId = table.dataset.warpId;
+    const data = totals[warpId];
+
+    if (data && data.total_meter && data.total_peace) {
+      const remainingMeter = data.total_meter - totalMeter;
+      const remainingCount = (remainingMeter / (data.total_meter / data.total_peace)).toFixed(0);
+
+      table.querySelector(".remaining-count").innerText = remainingCount;
+      table.querySelector(".remaining-meter").innerText = remainingMeter.toFixed(2);
+    }
+  });
+});
+</script>
+{% endblock %}

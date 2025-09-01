@@ -1,0 +1,178 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Create Warp Design{% endblock %}
+{% block content %}
+<h1 style="font-size:2.2rem; font-weight:700; color:#1565c0; text-shadow:0 2px 8px #bbdefb;">
+  <i class="fas fa-layer-group"></i> Create Warp Design
+</h1>
+<form id="warp-form" method="POST" action="" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%); box-shadow: 0 4px 16px rgba(21,101,192,0.08); border-radius: 16px;">
+    {% csrf_token %}
+    <label for="warp_name"><i class="fas fa-signature"></i> Warp Name</label>
+    <input type="text" id="warp_name" name="name" placeholder="Enter Warp Name" required>
+    <label><i class="fas fa-palette"></i> Design</label>
+    <div class="design entries" id="entries">
+       <div class="entry-group" style="background:#e3f2fd; border-radius:8px; margin-bottom:8px; box-shadow:0 2px 8px #bbdefb;">
+            <span class="serial-number">1.</span>
+            <select name="yarn_id[]" class="yarn-select" required>
+                <option value="">-- Select Yarn --</option>
+                {% for yarn in yarns %}
+                        <option value="{{ yarn.id }}">
+                            {{ yarn.color }} | {{ yarn.count }}
+                        </option>
+                {% endfor %}
+            </select>
+            <input type="number" step="0.01" name="lint[]" class="lint-input" placeholder="Lint count" required>
+            <input type="color" id="color" name="color[]">
+            <input type="checkbox" class="duplicate-checkbox" name="select_to_duplicate" title="Select to duplicate">
+            <button type="button" class="remove-btn" onclick="removeRow(this)">X</button>
+        </div>
+    </div>
+    <button type="button" class="add-btn" id="add_row_btn" onclick="addRow()"><i class="fas fa-plus"></i> Add More</button>
+    <input type="number" step="0.01" name="repet_count" class="repet-input" placeholder="Repeat no. of times">
+    <button type="button" class="repet-design-btn add-btn" id="repet_design" onclick="duplicateSelectedRows()"><i class="fas fa-redo"></i> Repeat Selected Design</button>
+    <label>Preview Design</label>
+    <div id="preview" style="width: 100%; height: 30px; display: flex; border: 1px solid #ccc; margin: 10px 0; border-radius:8px; box-shadow:0 2px 8px #bbdefb;"></div>
+    <label for="total_lint"><i class="fas fa-balance-scale"></i> Total Lint</label>
+    <input type="number" step="0.01" name="total_lint" id="total_lint" class="total_lint" readonly>
+    <button type="submit"><i class="fas fa-save"></i> Save</button>
+</form>
+<script>
+    document.addEventListener('input', function (event) {
+    if (
+        event.target.classList.contains('lint-input') ||
+        event.target.classList.contains('repet-input') ||
+        event.target.type === 'color'
+    ) {
+        updateTotalLint();
+        generateDesignPreview();
+    }
+});
+
+    function generateDesignPreview() {
+    const container = document.getElementById('entries');
+    const preview = document.getElementById('preview');
+    preview.innerHTML = ''; // Clear previous
+
+    const rows = container.querySelectorAll('.entry-group');
+    let totalLint = 0;
+
+    // First, calculate total lint
+    rows.forEach(row => {
+        const lintVal = parseFloat(row.querySelector('.lint-input')?.value);
+        if (!isNaN(lintVal)) totalLint += lintVal;
+    });
+
+    if (totalLint === 0) {
+        preview.innerHTML = '<div style="padding:5px; color: gray;">No lint values provided</div>';
+        return;
+    }
+
+    // Then, create colored segments
+    rows.forEach(row => {
+        const lint = parseFloat(row.querySelector('.lint-input')?.value);
+        const color = row.querySelector('input[type="color"]')?.value || '#ccc';
+
+        if (!isNaN(lint) && lint > 0) {
+            const percent = (lint / totalLint) * 100;
+            const segment = document.createElement('div');
+            segment.style.width = percent + '%';
+            segment.style.height = '100%';
+            segment.style.backgroundColor = color;
+            segment.title = `Lint: ${lint}`;
+            preview.appendChild(segment);
+        }
+    });
+}
+
+    function updateSerialNumbers() {
+    const rows = document.querySelectorAll('#entries .entry-group');
+    rows.forEach((row, index) => {
+        const sn = row.querySelector('.serial-number');
+        if (sn) sn.textContent = `${index + 1}.`;
+    });
+}
+
+    function updateTotalLint() {
+        const lintInputs = document.querySelectorAll('.lint-input');
+        let lintSum = 0;
+
+        lintInputs.forEach(input => {
+            const val = parseFloat(input.value);
+            if (!isNaN(val)) lintSum += val;
+        });
+
+        document.querySelector('.total_lint').value = lintSum;
+    }
+
+    document.addEventListener('input', function (event) {
+        if (event.target.classList.contains('lint-input') || event.target.classList.contains('repet-input')) {
+            updateTotalLint();
+        }
+    });
+
+    function addRow() {
+    const container = document.getElementById('entries');
+    const firstRow = container.querySelector('.entry-group');
+    const newRow = firstRow.cloneNode(true);
+
+    newRow.querySelectorAll('input').forEach(input => {
+        if (input.type === 'checkbox') input.checked = false;
+        else input.value = '';
+    });
+
+    newRow.querySelector('select').selectedIndex = 0;
+
+    container.appendChild(newRow);
+    updateSerialNumbers();  // Add this
+    updateTotalLint();
+}
+
+
+    function removeRow(button) {
+    const container = document.getElementById('entries');
+    if (container.children.length > 1) {
+        button.closest('.entry-group').remove();
+        updateSerialNumbers();  // Add this
+        updateTotalLint();
+        generateDesignPreview();
+    }
+}
+
+    function duplicateSelectedRows() {
+    const container = document.getElementById('entries');
+    const repetCountInput = document.querySelector('.repet-input');
+    const repetCount = parseInt(repetCountInput?.value);
+
+    if (isNaN(repetCount) || repetCount < 1) {
+        alert('Please enter a valid repetition count (1 or more).');
+        return;
+    }
+
+    const selectedRows = container.querySelectorAll('.entry-group input[type="checkbox"]:checked');
+
+    if (selectedRows.length === 0) {
+        alert('Please select at least one design row to repeat.');
+        return;
+    }
+    for (let i = 0; i < repetCount; i++) {
+    selectedRows.forEach(rowCheckbox => {
+        const row = rowCheckbox.closest('.entry-group');
+        const newRow = row.cloneNode(true);
+
+        newRow.querySelector('input[type="checkbox"]').checked = false;
+        const originalSelect = row.querySelector('select');
+        const newSelect = newRow.querySelector('select');
+        newSelect.value = originalSelect.value;
+
+        container.appendChild(newRow);
+
+    });
+}
+
+updateSerialNumbers();  // Add this
+updateTotalLint();
+generateDesignPreview();
+
+}
+
+</script>
+{% endblock %}

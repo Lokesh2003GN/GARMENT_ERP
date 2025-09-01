@@ -1,0 +1,35 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Piece Management{% endblock %}
+{% block content %}
+<br>
+<h1 class="logo-text" style="font-size:2.2rem; font-weight:700; color:#1565c0; text-shadow:0 2px 8px #bbdefb;">Piece Management</h1>
+<br>
+<section class="navigation-section" style="padding: 32px 0;">
+    <div class="card-grid">
+        <a href="/add_piece/" class="nav-card" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);">
+            <div class="card-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/2921/2921826.png" alt="Add Piece" style="width:48px;height:48px;margin-bottom:8px;">
+                <i class="fas fa-plus-circle fa-2x" style="color:#43a047;"></i>
+            </div>
+            <div class="card-content"><h4>Add Piece</h4></div>
+            <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+        <a href="/date_wise/" class="nav-card" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);">
+            <div class="card-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/2921/2921822.png" alt="Date Wise" style="width:48px;height:48px;margin-bottom:8px;">
+                <i class="fas fa-calendar-day fa-2x" style="color:#1565c0;"></i>
+            </div>
+            <div class="card-content"><h4>Date Wise Piece List</h4></div>
+            <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+        <a href="/warp_wise/" class="nav-card" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);">
+            <div class="card-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Warp Wise" style="width:48px;height:48px;margin-bottom:8px;">
+                <i class="fas fa-book-open fa-2x" style="color:#1565c0;"></i>
+            </div>
+            <div class="card-content"><h4>Warp Wise Piece List</h4></div>
+            <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+    </div>
+</section>
+{% endblock %}

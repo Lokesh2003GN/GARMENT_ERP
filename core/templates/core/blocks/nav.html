@@ -1,0 +1,81 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'core/nav.css' %}">
+<nav class="navbar">
+  <a href="/" class="brand" style="display:flex;align-items:center;gap:12px;">
+    <img src="https://cdn-icons-png.flaticon.com/512/2922/2922510.png" alt="Logo" style="width:40px;height:40px;border-radius:50%;box-shadow:0 2px 8px #bbdefb;">
+    <span style="font-weight:700;font-size:1.3rem;letter-spacing:2px;">Weaving Mills</span>
+  </a>
+  <div class="toggle" id="toggle">
+    <i class="fas fa-bars" style="font-size:2rem;color:#fff;"></i>
+  </div>
+  <ul class="nav-list" id="menu">
+    <li><button class="close-btn" id="closeBtn">×</button></li>
+    <li><a href="/" class="nav-link active"><i class="fas fa-home"></i> Home</a></li>
+    <li><a href="/yarn_management" class="nav-link"><i class="fas fa-cut"></i> Yarn</a></li>
+    <li><a href="/warp_management" class="nav-link"><i class="fas fa-cut"></i> Warps</a></li>
+    <li><a href="/piece_management" class="nav-link"><i class="fas fa-cut"></i> Piece</a></li>
+    <li><a href="/transactions" class="nav-link"><i class="fas fa-money-bill-wave"></i> Txns</a></li>
+    <li><a href="/account" class="nav-link"><i class="fas fa-user-circle"></i> Account</a></li>
+  </ul>
+</nav>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("toggle");
+    const menu = document.getElementById("menu");
+    const closeBtn = document.getElementById("closeBtn");
+
+    function handleResize() {
+      if (window.innerWidth <= 768) {
+        toggle.style.display = "flex";
+        toggle.style.position = "fixed";
+        toggle.style.top = "20px";
+        toggle.style.right = "20px";
+        toggle.style.background = "#1565c0";
+        toggle.style.padding = "8px";
+        toggle.style.borderRadius = "8px";
+        toggle.style.zIndex = "1002";
+      } else {
+        toggle.style.display = "none";
+        toggle.style.position = "";
+        toggle.style.top = "";
+        toggle.style.right = "";
+        toggle.style.background = "";
+        toggle.style.padding = "";
+        toggle.style.borderRadius = "";
+      }
+    }
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    // Open menu on mobile
+    toggle.addEventListener("click", function () {
+      menu.classList.add("open");
+      document.body.style.overflow = "hidden"; // Prevent background scroll
+    });
+
+    // Close menu on mobile
+    closeBtn.addEventListener("click", function () {
+      menu.classList.remove("open");
+      document.body.style.overflow = ""; // Restore scroll
+    });
+
+    // Close menu if clicking outside nav-list (mobile only)
+    document.addEventListener("click", function (e) {
+      if (menu.classList.contains("open") && !menu.contains(e.target) && !toggle.contains(e.target)) {
+        menu.classList.remove("open");
+        document.body.style.overflow = "";
+      }
+    });
+
+    // Active link highlighting
+    const currentPath = window.location.pathname;
+    document.querySelectorAll(".nav-link").forEach(link => {
+      const href = link.getAttribute("href");
+      if (currentPath === href || currentPath === href + '/') {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+  });
+</script>

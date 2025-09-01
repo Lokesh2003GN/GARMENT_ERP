@@ -1,0 +1,59 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+
+{% block content %}
+<h2 style="font-size:2rem; font-weight:700; color:#1565c0; text-shadow:0 2px 8px #bbdefb;"><i class="fas fa-user-circle"></i> Account Details</h2>
+<form id="account-form" method="POST" action="{% url 'edit_account' %}" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%); box-shadow: 0 4px 16px rgba(21,101,192,0.08); border-radius: 16px;">
+    {% csrf_token %}
+    <label><i class="fas fa-user"></i> Name</label>
+    <input type="text" name="name" id="name" value="{{ request.user.username }}" readonly>
+    <label><i class="fas fa-phone"></i> Phone Number</label>
+    <input type="number" name="phone1" id="phone1" value="{{ request.user.phone1 }}" readonly>
+    <label><i class="fas fa-phone-alt"></i> Alternative Number</label>
+    <input type="number" name="phone2" id="phone2" value="{{ request.user.phone2 }}" readonly>
+    <label><i class="fas fa-envelope"></i> Email</label>
+    <input type="email" name="email" id="email" value="{{ request.user.email }}" readonly>
+    <label><i class="fas fa-map-marker-alt"></i> Address</label>
+    <input type="text" name="address" id="address" value="{{ request.user.address }}" readonly>
+    <div class="btn-row" style="margin-bottom: 32px;">
+        <button type="button" class="submit" id="edit-btn"><i class="fas fa-edit"></i> Edit</button>
+        <button type="submit" id="save-btn" style="display: none;"><i class="fas fa-save"></i> Save</button>
+        <a href="{% url 'logout' %}" class="submit" style="text-decoration: none; background-color: red;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <button type="button" class="submit" id="toggle-password-form"><i class="fas fa-key"></i> Change Password</button>
+    </div>
+</form>
+<!-- Hidden Change Password Form -->
+<form id="password-form" method="POST" action="{% url 'change_password' %}" style="display: none; margin-top: 50px; background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%); box-shadow: 0 4px 16px rgba(21,101,192,0.08); border-radius: 16px;">
+    {% csrf_token %}
+    <label><i class="fas fa-lock"></i> Current Password</label>
+    <input type="password" name="password" id="password">
+    <label><i class="fas fa-unlock-alt"></i> New Password</label>
+    <input type="password" name="new_password" id="new_password">
+    <label><i class="fas fa-check-circle"></i> Confirm Password</label>
+    <input type="password" name="confirm_password" id="confirm_password">
+    <button type="submit" class="submit"><i class="fas fa-paper-plane"></i> Submit</button>
+</form>
+<script>
+  const editBtn = document.getElementById('edit-btn');
+  const saveBtn = document.getElementById('save-btn');
+  const inputs = document.querySelectorAll('#account-form input');
+  const togglePasswordFormBtn = document.getElementById('toggle-password-form');
+  const select = document.querySelectorAll('#account-form select');
+  const passwordForm = document.getElementById('password-form');
+
+  // Enable editing account fields
+  editBtn.addEventListener('click', () => {
+    inputs.forEach(input => input.removeAttribute('readonly'));
+    select.forEach(input => input.removeAttribute('disabled'));
+    editBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+  });
+
+  // Toggle password form display
+  togglePasswordFormBtn.addEventListener('click', () => {
+    passwordForm.style.display = (passwordForm.style.display === 'none' || passwordForm.style.display === '') 
+      ? 'block' 
+      : 'none';
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block content %}
+<div class="page-wrapper" style="background: linear-gradient(120deg, #e3f2fd 60%, #bbdefb 100%); min-height: 100vh;">
+    <!-- Header Section -->
+    <header class="header" style="background: linear-gradient(90deg, #1565c0 60%, #42a5f5 100%); color: #fff; box-shadow: 0 4px 16px rgba(21,101,192,0.08); border-radius: 0 0 24px 24px;">
+        <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; padding: 32px 40px;">
+            <div class="logo-section" style="display: flex; align-items: center; gap: 24px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/2922/2922510.png" alt="Weaving Mills Logo" style="width:64px; height:64px; border-radius:50%; box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+                <h1 class="logo-text" style="font-size: 2.5rem; font-weight: 700; margin: 0;">Weaving Mills Management System</h1>
+            </div>
+            <div class="user-section" style="display: flex; align-items: center; gap: 24px;">
+                <div class="welcome-message" style="font-size: 1.2rem;">
+                    <span class="greeting" style="color: #bbdefb;">Welcome back,</span>
+                    <strong class="username" style="color: #fff;">{{ request.user.username }}</strong>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-btn" style="background: #e53935; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; box-shadow: 0 2px 8px rgba(229,57,53,0.12);">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    <br><br>
+    <!-- Navigation Cards Section -->
+    <section class="navigation-section" style="padding: 32px 0;">
+        <div class="card-grid">
+            <a href="/date_wise/" class="nav-card" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);">
+                <div class="card-icon">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2921/2921822.png" alt="Calendar" style="width:48px;height:48px;margin-bottom:8px;">
+                    <i class="fas fa-calendar-alt fa-2x" style="color:#1565c0;"></i>
+                </div>
+                <div class="card-content"><h4>Date-wise Piece List</h4></div>
+                <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+            <a href="/warp_wise/" class="nav-card" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);">
+                <div class="card-icon">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Book" style="width:48px;height:48px;margin-bottom:8px;">
+                    <i class="fas fa-book fa-2x" style="color:#1565c0;"></i>
+                </div>
+                <div class="card-content"><h4>Warp-wise Piece List</h4></div>
+                <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+            <a href="/transactions/" class="nav-card" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);">
+                <div class="card-icon">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2920/2920212.png" alt="Transactions" style="width:48px;height:48px;margin-bottom:8px;">
+                    <i class="fas fa-money-bill-wave fa-2x" style="color:#1565c0;"></i>
+                </div>
+                <div class="card-content"><h4>Transactions</h4></div>
+                <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+            <a href="/warp_wise_yarn_list/" class="nav-card" style="background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);">
+                <div class="card-icon">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2921/2921826.png" alt="Yarn" style="width:48px;height:48px;margin-bottom:8px;">
+                    <i class="fas fa-cut fa-2x" style="color:#1565c0;"></i>
+                </div>
+                <div class="card-content"><h4>Warp wise Yarn List</h4></div>
+                <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+            </a>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="footer" style="background: linear-gradient(90deg, #1565c0 60%, #42a5f5 100%); color: #fff; text-align: center; padding: 24px 0; border-radius: 24px 24px 0 0; margin-top: 48px;">
+        <div class="container">
+            <p style="font-size: 1.1rem;">&copy; 2024 Weaving Mills Management System. <span style="color:#bbdefb;">Empowering textile excellence.</span></p>
+        </div>
+    </footer>
+</div>
+{% endblock %}

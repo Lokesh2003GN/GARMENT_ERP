@@ -1,0 +1,119 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Weaver-wise Piece Records</h1>
+<div class="type-reference">
+  <div class="color good">Good</div>
+  <div class="color demage">Damage</div>
+  <div class="color extra">Extra</div>
+  <div class="color return">Return</div>
+</div>
+
+
+
+
+
+{% if request.user.staff.role == 'weaver' %}
+  {# No weaver selection needed for weaver login #}
+{% else %}
+  <form method="get" action="" id="weaver_form">
+    <label>Select Weaver:</label>
+    <select name="weaver_id" onchange="this.form.submit()" required>
+      <option value="">-- Select Weaver --</option>
+      {% for weaver in weavers %}
+        <option value="{{ weaver.user.id }}" {% if request.GET.weaver_id == weaver.user.id|stringformat:"s" %}selected{% endif %}>
+          {{ weaver.user.username }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+{% endif %}
+
+{% if selected_weaver %}
+  {% for date, pieces in grouped_by_date.items %}
+    <h2>Date: {{ date }}</h2>
+    <table border="1" cellpadding="6" cellspacing="0" class="note-table">
+      <thead>
+        <tr>
+          <th>Warp</th>
+          <th>Count</th>
+          <th>Length</th>
+          <th>Meters</th>
+          <th>Wage</th>
+          <th>Wage/Meter</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for piece in pieces %}
+        <tr class="{{ piece.type }} open-popup" data-piece-id="{{ piece.id }}">
+          <td>{{ piece.warp.name }}</td>
+          <td class="count">{{ piece.count }}</td>
+          <td class="length">{{ piece.length }}</td>
+          <td class="meter">{{ piece.calculated_meter }}</td>
+          <td class="wage">{{ piece.calculated_amount }}</td>
+          <td class="wage/meter">{{ piece.wage }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="totals">
+        <tr>
+          <th>Total</th>
+          <td class="total-count">0</td>
+          <td></td>
+          <td class="total-meter">0</td>
+          <td class="total-wage">0</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    <br>
+  {% endfor %}
+{% elif request.GET.weaver_id %}
+  <p style="color:red;">No data found for selected weaver.</p>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const userType = "{{ request.user.type|escapejs }}";
+
+  // Auto-calculate totals (excluding 'return' rows)
+  document.querySelectorAll('.note-table').forEach(table => {
+    let totalCount = 0;
+    let totalMeter = 0;
+    let totalWage = 0;
+
+    table.querySelectorAll('tbody tr').forEach(row => {
+      if (row.classList.contains('return')) return; // Skip 'return' rows
+
+      const count = parseFloat(row.querySelector('.count')?.innerText) || 0;
+      const meter = parseFloat(row.querySelector('.meter')?.innerText) || 0;
+      const wage = parseFloat(row.querySelector('.wage')?.innerText) || 0;
+
+      totalCount += count;
+      totalMeter += meter;
+      totalWage += wage;
+    });
+
+    table.querySelector('.total-count').innerText = totalCount.toFixed(2);
+    table.querySelector('.total-meter').innerText = totalMeter.toFixed(2);
+    table.querySelector('.total-wage').innerText = totalWage.toFixed(2);
+  });
+if (userType !== 'owner') return;
+
+  // Open popup on row click
+  document.querySelectorAll('.open-popup').forEach(row => {
+    row.addEventListener('click', () => {
+      const pieceId = row.dataset.pieceId;
+      if (!pieceId) return;
+      const url = `/edit_piece/${pieceId}/`;
+      const popup = window.open(url, 'Edit piece', 'width=600,height=400,scrollbars=yes');
+      if (window.focus && popup) popup.focus();
+    });
+  });
+});
+
+
+
+</script>
+{% endblock %}

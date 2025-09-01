@@ -1,0 +1,88 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Test{% endblock %}
+{% block content %}
+   
+    <div class="page-wrapper">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <i class="fas fa-industry logo-icon"></i>
+                    <br>
+                    <h1 class="logo-text">Weaving Mills Management System</h1>
+                </div>
+                <div class="user-section">
+                    <div class="welcome-message">
+                        <span class="greeting">Welcome back,</span>
+                        <strong class="username">{{ request.user.username }}</strong>
+                       
+                    </div>
+                    <a href="{% url 'logout' %}" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+<br><br>
+<br><br>
+
+                <!-- Navigation Cards Section -->
+                <section class="navigation-section">
+                    <div class="card-grid">
+                        
+
+                        <a href="/warp_list_warper/" class="nav-card">
+                            <div class="card-icon">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Warp List" style="width:48px;height:48px;margin-bottom:8px;">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Warp List</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                        <a href="/warp_wise_yarn_list/" class="nav-card">
+                            <div class="card-icon">
+                                <img src="https://cdn-icons-png.flaticon.com/512/2921/2921826.png" alt="Yarn List" style="width:48px;height:48px;margin-bottom:8px;">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Warp wise Yarn List</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                        
+                        <a href="/transactions/" class="nav-card">
+                            <div class="card-icon">
+                                <img src="https://cdn-icons-png.flaticon.com/512/2920/2920212.png" alt="Transactions" style="width:48px;height:48px;margin-bottom:8px;">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>Transactions</h4>
+                                
+                            </div>
+                            <div class="card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                       
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 Weaving Mills Management System. Empowering textile excellence.</p>
+            </div>
+        </footer>
+    </div>
+ {% endblock %}

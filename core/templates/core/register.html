@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register as Owner</title>
+    {% load static %}
+<link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h2>Owner Registration</h2>
+    <form method="POST">
+    {% csrf_token %}
+    
+    <label>Username:</label>
+    <input type="text" name="username" required><br>
+
+    <label>Password:</label>
+    <input type="password" name="password" required><br>
+    
+    <label>Phone Number:</label>
+    <input type="text" name="phone1" required><br>
+
+    <label>Company Name:</label>
+    <input type="text" name="company_name" required><br>
+
+    <label>Company Address:</label>
+    <textarea name="company_address" required></textarea><br>
+
+    <button type="submit">Register</button>
+</form>
+
+    <p>Already have an account? <a href="{% url 'user_login' %}">Login here</a></p>
+</body>
+</html>

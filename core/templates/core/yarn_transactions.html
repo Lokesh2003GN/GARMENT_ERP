@@ -1,0 +1,272 @@
+{% extends 'core/blocks/base.html' %}
+
+{% block title %}Yarn Transactions{% endblock %}
+
+{% block content %}
+<h1>Yarn Transactions</h1>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<form id="yarn-transaction-form" method="POST" action="{% url 'give_yarn' %}">
+  {% csrf_token %}
+
+  <label for="date">Date:</label>
+  <input type="date" name="date" id="date" required>
+
+  <label for="transaction_type">Type:</label>
+  <select name="transaction_type" id="transaction_type" required>
+    <option value="give">Give</option>
+    <option value="buy">Buy</option>
+  </select>
+
+  <div id="note-field">
+    <label for="note">Note:</label>
+    <input type="text" name="note" id="note">
+  </div>
+
+  <div id="staff-field">
+    <label for="staff_select">Select Staff:</label>
+    <select name="staff_select" id="staff_select">
+      <option value="">-- Select Staff --</option>
+      {% for s in staff %}
+        <option value="{{ s.user.id }}" data-role="{{ s.role }}">{{ s.user.username }} ({{ s.role }})</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="warp-field">
+    <label for="warp_select">Select Warp:</label>
+    <select name="warp_select" id="warp_select">
+      <option value="">-- Select Warp --</option>
+    </select>
+  </div>
+
+  <div id="yarn-field">
+    <label for="yarn_id">Select Yarn:</label>
+    <select name="yarn_id" id="yarn_id" required>
+      <option value="">-- Select Yarn --</option>
+      {% for yarn in yarns %}
+        <option value="{{ yarn.id }}">{{ yarn.color }} | {{ yarn.count }}<sup>s</sup></option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="quantity-field">
+    <label for="quantity">Quantity:</label>
+    <input type="number" name="quantity" id="quantity" step="0.01" required>
+  </div>
+
+  <button type="submit">Save Transaction</button>
+</form>
+
+<!-- Yarn Details Section -->
+<div id="yarn-details" style="margin-top: 20px;">
+  <h3>Yarns for this Warp:</h3>
+  <div id="yarn-list"></div>
+</div>
+
+<!-- JSON data for JS -->
+{{ warps|json_script:"warp-data" }}
+{{ warp_entries|json_script:"warp-entry-data" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const transactionTypeSelect = document.getElementById('transaction_type');
+  const noteField = document.getElementById('note-field');
+  const staffField = document.getElementById('staff-field');
+  const warpField = document.getElementById('warp-field');
+  const yarnField = document.getElementById('yarn-field');
+  const quantityField = document.getElementById('quantity-field');
+  const staffSelect = document.getElementById('staff_select');
+  const warpSelect = document.getElementById('warp_select');
+  const yarnListContainer = document.getElementById('yarn-list');
+  const yarnDetailsSection = document.getElementById('yarn-details');
+
+  const warpData = JSON.parse(document.getElementById('warp-data').textContent);
+  const warpEntries = JSON.parse(document.getElementById('warp-entry-data').textContent);
+
+  document.getElementById('date').valueAsDate = new Date();
+
+  function toggleFields() {
+    const selectedType = transactionTypeSelect.value;
+    if (selectedType === 'buy') {
+      noteField.style.display = 'block';
+      staffField.style.display = 'none';
+      warpField.style.display = 'none';
+      yarnField.style.display = 'block';
+      quantityField.style.display = 'block';
+      yarnDetailsSection.style.display = 'none';
+      warpSelect.disabled = true;
+    } else {
+      noteField.style.display = 'none';
+      staffField.style.display = 'block';
+      warpField.style.display = 'block';
+      yarnField.style.display = 'block';
+      quantityField.style.display = 'block';
+      warpSelect.disabled = !staffSelect.value;
+      if (staffSelect.value) {
+        populateWarpsForStaff(staffSelect.value);
+        adjustFieldsByRole();
+      }
+    }
+  }
+
+  function populateWarpsForStaff(staffId) {
+    warpSelect.innerHTML = '<option value="">-- Select Warp --</option>';
+    warpData.forEach(warp => {
+      if (warp.weaver_id == parseInt(staffId) || warp.warper_id == parseInt(staffId)) {
+        const opt = document.createElement('option');
+        opt.value = warp.id;
+        opt.textContent = warp.name || `Warp #${warp.id}`;
+        warpSelect.appendChild(opt);
+      }
+    });
+  }
+
+  function adjustFieldsByRole() {
+    const selectedOption = staffSelect.options[staffSelect.selectedIndex];
+    const role = selectedOption.getAttribute('data-role');
+    const isWarper = role === 'warper';
+
+    yarnField.style.display = 'block';
+    quantityField.style.display = 'block';
+
+    document.getElementById('yarn_id').disabled = isWarper;
+    document.getElementById('quantity').disabled = isWarper;
+
+    yarnDetailsSection.style.display = isWarper ? 'block' : 'none';
+  }
+
+  function showYarnDetails(warpId) {
+    yarnListContainer.innerHTML = '';
+    if (!warpId || !warpEntries[warpId]) {
+      yarnListContainer.innerHTML = '<p>No yarns for this warp.</p>';
+      return;
+    }
+
+    const warp = warpData.find(w => w.id == warpId);
+    const warpYarn = warp.warp_yarn;
+    const warpMeters = warp.meters;
+    const grouped = {};
+    let totalLint = 0;
+    let totalYarnRequired = 0;
+
+    warpEntries[warpId].forEach(entry => {
+      const key = `${entry.yarn_id}|${entry.color}|${entry.yarn_name}`;
+      const lintCount = parseFloat(entry.lint_count);
+      if (!grouped[key]) grouped[key] = 0;
+      grouped[key] += lintCount;
+      totalLint += lintCount;
+    });
+
+    const table = document.createElement('table');
+    table.border = "1";
+    table.style.borderCollapse = "collapse";
+    table.style.marginTop = "10px";
+    table.className = "note-table";
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Yarn Name</th>
+          <th>Color</th>
+          <th>Lint Count</th>
+          <th>Yarn per 100m per 100 yarns</th>
+          <th>Total meters</th>
+          <th>Yarn Required</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector('tbody');
+    const tfoot = document.createElement('tfoot');
+    table.appendChild(tfoot);
+
+    Object.entries(grouped).forEach(([key, totalQty]) => {
+      const [yarnId, color, yarnName] = key.split('|');
+      const equivalent = (totalQty / 10000) * warpMeters;
+      const yarnRequired = equivalent * warpYarn;
+      totalYarnRequired += yarnRequired;
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${yarnName}</td>
+        <td><span style="display:inline-block;width:20px;height:20px;background:${color};border:1px solid #000;"></span></td>
+        <td>${totalQty.toFixed(2)}</td>
+        <td>${warpYarn}</td>
+        <td>${warpMeters.toFixed(2)}</td>
+        <td><input type='number' id='yarn_quantity' name='yarn_quantity' value='${yarnRequired.toFixed(2)}'></td>
+        <td><button class="give-btn" data-yarn-id="${yarnId}" data-quantity="${yarnRequired.toFixed(2)}">Give</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `
+      <td colspan="2">Total</td>
+      <td>${totalLint.toFixed(2)}</td>
+      <td></td>
+      <td></td>
+      <td>${totalYarnRequired.toFixed(2)}</td>
+      <td></td>
+    `;
+    tfoot.appendChild(totalRow);
+    yarnListContainer.appendChild(table);
+  }
+
+  transactionTypeSelect.addEventListener('change', toggleFields);
+
+  staffSelect.addEventListener('change', () => {
+    if (staffSelect.value) {
+      warpSelect.disabled = false;
+      populateWarpsForStaff(staffSelect.value);
+      adjustFieldsByRole();
+    } else {
+      warpSelect.disabled = true;
+      warpSelect.innerHTML = '<option value="">-- Select Warp --</option>';
+      yarnDetailsSection.style.display = 'none';
+    }
+  });
+
+  warpSelect.addEventListener('change', () => {
+    const warpId = warpSelect.value;
+    showYarnDetails(warpId);
+  });
+
+  document.addEventListener('click', function (e) {
+  if (e.target.classList.contains('give-btn')) {
+    const yarnId = e.target.getAttribute('data-yarn-id');
+
+    const row = e.target.closest('tr');
+    const inputField = row.querySelector('input[name="yarn_quantity"]');
+    const quantity = inputField ? inputField.value : e.target.getAttribute('data-quantity');
+
+    document.getElementById('yarn_id').value = yarnId;
+    document.getElementById('quantity').value = quantity;
+
+    const yarnField = document.getElementById('yarn_id');
+    const quantityField = document.getElementById('quantity');
+
+    if (yarnField && quantityField) {
+      yarnField.disabled = false;
+      quantityField.disabled = false;
+    }
+
+    document.getElementById('yarn-transaction-form').scrollIntoView({ behavior: 'smooth' });
+
+    setTimeout(() => {
+      document.getElementById('yarn-transaction-form').submit();
+    }, 500);
+  }
+});
+
+
+
+  toggleFields();
+});
+</script>
+{% endblock %}

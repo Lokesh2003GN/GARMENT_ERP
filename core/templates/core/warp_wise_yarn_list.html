@@ -1,0 +1,101 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Staff-wise Yarn List</h1>
+
+{% if request.user.is_authenticated and request.user.is_staff_user %}
+    <p>Displaying yarn transactions for your assigned warps.</p>
+{% else %}
+    <form method="get" action="" id="staff_form">
+        <label for="staff_select">Select Staff:</label>
+        <select name="staff_id" id="staff_select" onchange="document.getElementById('staff_form').submit();">
+            <option value="">-- Select Staff --</option>
+            {% for s in staff_list %}
+                <option value="{{ s.user.id }}" data-role="{{ s.role }}"
+                    {% if s.user.id|stringformat:"s" == selected_staff_id %}selected{% endif %}>
+                    {{ s.user.username }} ({{ s.role }})
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+{% endif %}
+
+<hr>
+
+{% if selected_staff %}
+    <h2>Staff: {{ selected_staff.username }}</h2>
+{% endif %}
+
+{% if grouped_yarns %}
+    {% for warp, transactions in grouped_yarns.items %}
+        {% regroup transactions by yarn as yarn_groups %}
+        <h3>Warp: {{ warp.name }}</h3>
+
+        {% for yarn_group in yarn_groups %}
+            <h4>Yarn: {{ yarn_group.grouper.color }} - {{ yarn_group.grouper.count }}<sup>s</sup></h4>
+            <table border="1" cellpadding="6" cellspacing="0" class="note-table">
+                <thead>
+    <tr>
+        <th>Date</th>
+        <th>Quantity</th>
+        <th>Given To</th>
+    </tr>
+</thead>
+<tbody>
+    {% for transaction in yarn_group.list %}
+        <tr>
+            <td>{{ transaction.date|date:"Y-m-d" }}</td>
+            <td class="yarn-qty">{{ transaction.quantity|floatformat:2 }}</td>
+            <td>{{ transaction.to|title }}</td>
+        </tr>
+    {% endfor %}
+</tbody>
+
+                <tfoot>
+                    <tr>
+                        <td>Total Used Quantity:</td>
+                        <td class="total-used-quantity">0</td>
+                    </tr>
+                    
+                </tfoot>
+            </table>
+            <br>
+        {% endfor %}
+    {% endfor %}
+{% elif selected_staff %}
+    <p>No yarn transactions found for <strong>{{ selected_staff.username }}</strong>'s warps yet.</p>
+{% else %}
+    <p>Please select a staff from the dropdown above to view their yarn transaction history.</p>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.note-table').forEach(table => {
+        let totalUsedQuantity = 0;
+
+        table.querySelectorAll('.yarn-qty').forEach(cell => {
+            const quantity = parseFloat(cell.innerText) || 0;
+            totalUsedQuantity += quantity;
+        });
+
+        const totalUsedCell = table.querySelector('.total-used-quantity');
+        const remainingCell = table.querySelector('.remaining-quantity');
+
+        if (totalUsedCell) {
+            totalUsedCell.innerText = totalUsedQuantity.toFixed(2);
+        }
+
+        if (remainingCell) {
+            const yarnPer100 = parseFloat(remainingCell.dataset.warpYarn) || 0;
+            const meters = parseFloat(remainingCell.dataset.warpMeters) || 0;
+
+            const totalInitialQuantity = (yarnPer100 / 100) * meters;
+            const remainingQuantity = totalInitialQuantity - totalUsedQuantity;
+
+            remainingCell.innerText = remainingQuantity.toFixed(2);
+        }
+    });
+});
+</script>
+{% endblock %}

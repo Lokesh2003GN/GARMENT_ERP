@@ -1,0 +1,31 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %} Edit Warp {% endblock %}
+{% block content %}
+<h2>Edit wage</h2>
+
+<form id="wage-form" method="POST" action="{% url 'change_wage' wage.id %}">
+    {% csrf_token %}
+    <label>Date</label>
+    <input type="date" name="date" required value="{{ wage.date|date:'Y-m-d' }}">
+    
+    <label>Select Existing Staff</label>
+    <select name="staff_select" id="staff_select" required>
+        <option value="">-- Select staff --</option>
+        {% for c in staff %}
+            <option value="{{ c.user.id }}" {% if wage.staff.id == c.user.id %}selected{% endif %}>{{ c.user.username }}</option>
+        {% endfor %}
+    </select>
+    
+    <label>Amount</label>
+    <input type="number" step="0.01" name="amount" value="{{ wage.amount }}" required>
+    <label>Note</label>
+    <input type="text" name="note" value="{{ wage.note }}">
+    <br><br>
+    <button type="submit">Save wage</button>
+    <button type="submit" name="delete_wage" value="true" onclick="return confirm('Are you sure you want to delete this wage?');" style="background-color: red; color: white;">
+        Delete wage
+    </button>
+</form>
+
+
+ {% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %} Edit Warp {% endblock %}
+{% block content %}
+<h1>Yarn List</h1>
+<form method="POST" action="">
+    {% csrf_token %}
+    <label for="staff_yarn">Select Yarn:</label>
+    <select name="staff_yarn" id="staff_yarn">
+        <option value="">-- Select Yarn --</option>
+        {% for yarn in yarns %}
+            <option value="{{ yarn.id }}">{{ yarn.color }} | {{ yarn.count}}'<sup>s</sup></option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+
+</form>
+<h2>{{ select_yarn.color }} | {{ select_yarn.count }} </h2>
+<table border="1" cellpadding="6" cellspacing="0" class="note-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Quantity</th>
+            <th>Note</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+<tbody>
+    {% for transaction in yarn_transactions %}
+        <tr onclick="editYarn({{ transaction.id }})">
+            <td>{{ transaction.date }}</td>
+            <td>{{ transaction.quantity }}</td>
+            <td>
+                {% if transaction.transaction_type == 'buy' %}
+                    {{ transaction.note }}
+                {% else %}
+                    {{ transaction.warp.name }} | {{ transaction.get_to_display }}
+                {% endif %}
+            </td>
+
+
+            <td>{{ transaction.transaction_type }}</td>
+        </tr>
+    {% endfor %}
+</tbody>
+
+    <tfoot>
+        <tr>
+            <td>Remaining</td>
+            <td>{{ remaining_quantity }}</td>
+        </tr>
+
+    </tfoot>
+</table>    
+
+<script>
+function editYarn(yarnId) {
+    window.location.href = `/edit_yarn/${yarnId}/`;
+    console.log("calling...");
+}
+
+
+
+</script>
+ {% endblock %}
+

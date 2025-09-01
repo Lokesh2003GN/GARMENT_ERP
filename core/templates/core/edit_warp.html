@@ -1,0 +1,182 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+
+{% block title %}Edit Warp{% endblock %}
+
+{% block content %}
+<h2>Edit Warp</h2>
+
+{% if warp.isSecondary and warp.primary_warp %}
+    <div style="background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 20px;">
+        <strong>Note:</strong> This is a secondary warp linked to the primary warp: 
+        <a href="{% url 'edit_warp' warp.primary_warp.id %}">{{ warp.primary_warp.name }}</a>. 
+        It cannot have its own secondary warps.
+    </div>
+{% endif %}
+
+<form method="POST" action="{% url 'edit_warp' warp.id %}">
+    {% csrf_token %}
+
+    <label>Warp Design</label>
+    <select name="warp_design_select" required>
+        <option value="">-- Select Design --</option>
+        {% for design in warp_designs %}
+            <option value="{{ design.id }}" {% if warp.design.id == design.id %}selected{% endif %}>
+                {{ design.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>Warp Name</label>
+    <input type="text" name="name" value="{{ warp.name }}" required>
+
+    <label>Weaver</label>
+    <select name="weaver_select">
+        <option value="">-- Select Weaver --</option>
+        {% for staff in weavers %}
+            <option value="{{ staff.user.id }}" {% if warp.weaver and warp.weaver.id == staff.user.id %}selected{% endif %}>
+                {{ staff.user.username }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>Warper</label>
+    <select name="warper_select">
+        <option value="">-- Select Warper --</option>
+        {% for staff in warpers %}
+            <option value="{{ staff.user.id }}" {% if warp.warper and warp.warper.id == staff.user.id %}selected{% endif %}>
+                {{ staff.user.username }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>Meters</label>
+    <input type="number" step="0.01" name="meters" value="{{ warp.meters }}">
+
+    <label>Date Start (Warper)</label>
+    <input type="date" name="date_start_warper" value="{{ warp.date_start_warper|date:'Y-m-d' }}">
+
+    <label>Date Start (Weaver)</label>
+    <input type="date" name="date_start_weaver" value="{{ warp.date_start_weaver|date:'Y-m-d' }}">
+
+    <label>Length</label>
+    <input type="number" step="0.01" name="length" value="{{ warp.length }}">
+
+    <label>Warp Wage</label>
+    <input type="number" step="0.01" name="warp_wage" value="{{ warp.warp_wage }}">
+
+    <div>
+        <label>
+            <input type="checkbox" name="isWarped" {% if warp.isWarped %}checked{% endif %}> Is Warped
+        </label>
+        <label>
+            <input type="checkbox" name="isComplected" {% if warp.isComplected %}checked{% endif %}> Is Completed
+        </label>
+        <label>
+            <input type="checkbox" name="isSecondary" {% if warp.isSecondary %}checked{% endif %}> Is Secondary
+        </label>
+        </div>
+
+    {% if not warp.isSecondary %}
+        <div id="secondary-warp-selector">
+            <hr>
+            <h4>Manage Secondary Warps</h4>
+            <label for="secondary_warps">Select warps that should be secondary to this one:</label>
+            <select name="secondary_warps" id="secondary_warps" multiple style="height: 150px;">
+                {% for w in all_warps %}
+                    {# Check if the potential secondary's primary_warp is the current warp #}
+                    <option value="{{ w.id }}" {% if w.primary_warp == warp %}selected{% endif %}>
+                        {{ w.name }} ({{ w.design.name }})
+                    </option>
+                {% endfor %}
+            </select>
+            <small>Hold Ctrl (or ⌘ on Mac) to select multiple. Deselect all to unlink.</small>
+        </div>
+    {% endif %}
+
+    <br><br>
+    <button type="submit" name="update_warp">Update Warp</button>
+    <button type="submit" name="delete_warp" onclick="return confirm('Are you sure you want to delete this warp?')" style="background-color: #dc3545;">Delete Warp</button>
+</form>
+
+{% if not warp.isSecondary %}
+<hr>
+
+<h2>Edit Wage</h2>
+<form id="wage-form" method="POST" action="{% url 'edit_wage' warp.id %}">
+    {% csrf_token %}
+    <div id="wage-entries">
+        {% for wage in wage_list %}
+        <div class="entry-group" style="display: block;">
+            <label>Date</label>
+            <input type="date" name="date[]" value="{{ wage.date|date:'Y-m-d' }}" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Good</label>
+                    <input type="number" step="0.01" name="wage_good[]" value="{{ wage.wage_good }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Damaged</label>
+                    <input type="number" step="0.01" name="wage_demage[]" value="{{ wage.wage_demage }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Extra</label>
+                    <input type="number" step="0.01" name="wage_extra[]" value="{{ wage.wage_extra }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Remove</label>
+                    <button type="button" onclick="removeRow(this)">X</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not wage_list %}
+        <div class="entry-group">
+            <label>Date</label>
+            <input type="date" name="date[]" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Good</label>
+                    <input type="number" step="0.01" name="wage_good[]" required>
+                </div>
+                <div class="form-group">
+                    <label>Damaged</label>
+                    <input type="number" step="0.01" name="wage_demage[]" required>
+                </div>
+                <div class="form-group">
+                    <label>Extra</label>
+                    <input type="number" step="0.01" name="wage_extra[]" required>
+                </div>
+                <div class="form-group">
+                    <label>Remove</label>
+                    <button type="button" onclick="removeRow(this)">X</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <button type="button" class="add-btn" onclick="addWageRow()">+ Add More</button>
+    <button type="submit">Update Wage</button>
+</form>
+{% endif %}
+
+<script>
+function addWageRow() {
+    const container = document.getElementById('wage-entries');
+    const newRow = container.firstElementChild.cloneNode(true);
+    newRow.querySelectorAll('input').forEach(input => input.value = '');
+    container.appendChild(newRow);
+}
+
+function removeRow(button) {
+    const row = button.closest('.entry-group');
+    const container = document.getElementById('wage-entries');
+    if (container.children.length > 1) {
+        container.removeChild(row);
+    } else {
+        alert("At least one entry is required.");
+    }
+}
+</script>
+{% endblock %}

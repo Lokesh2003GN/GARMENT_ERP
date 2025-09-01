@@ -1,0 +1,74 @@
+
+{% load static %}
+
+{% if role == 'weaver' %}
+<div class="type-reference">
+  <div class="color good">Good</div>
+  <div class="color demage">Damage</div>
+  <div class="color extra">Extra</div>
+  <div class="color return">Return</div>
+</div>
+<table class="note-table">
+  <thead>
+    <tr>
+      <th>Warp</th>
+      <th>Type</th>
+      <th>Count</th>
+      <th>Length</th>
+      <th>Meter</th>
+      <th>Wage</th>
+      <th>Wage/Meter</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for piece in pieces %}
+    <tr class="{{ piece.type }}">
+      <td>{{ piece.warp.name }}</td>
+      <td>{{ piece.type }}</td>
+      <td class="count">{{ piece.count }}</td>
+      <td>{{ piece.length }}</td>
+      <td class="meter">{{ piece.meter }}</td>
+      <td class="wage">{{ piece.amount }}</td>
+      <td class="wage-per-meter">0</td>
+    </tr>
+    {% endfor %}
+    <tr style="font-weight:bold;">
+      <td colspan="2">Total</td>
+      <td class="total-count">0</td>
+      <td></td>
+      <td class="total-meter">0</td>
+      <td class="total-wage">0</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+{% elif role == 'warper' %}
+<table class="note-table">
+  <thead>
+    <tr>
+      <th>Warp</th>
+      <th>Meters</th>
+      <th>Wage / Meter</th>
+      <th>Total Wage</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for warp in warps %}
+    <tr>
+      <td>{{ warp.name }}</td>
+      <td>{{ warp.meters }}</td>
+      <td>{{ warp.warp_wage }}</td>
+      <td>{{ warp.amount }}</td>
+    </tr>
+    {% endfor %}
+    <tr style="font-weight:bold;">
+      <td>Total</td>
+      <td>{{ total_meters }}</td>
+      <td></td>
+      <td>{{ total_amount }}</td>
+    </tr>
+  </tbody>
+</table>
+{% endif %}
+

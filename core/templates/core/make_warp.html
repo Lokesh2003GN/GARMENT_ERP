@@ -1,0 +1,64 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Add New Warp{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add New Warp</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="warp_design_select" class="form-label">Warp Design</label>
+            <select name="warp_design_select" id="warp_design_select" class="form-control" required>
+                <option value="">Select Design</option>
+                {% for design in designs %}
+                    <option value="{{ design.id }}">{{ design.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+        <div class="mb-3">
+            <label for="warper_select" class="form-label">Warper</label>
+            <select name="warper_select" id="warper_select" class="form-control">
+                <option value="">Select Warper</option>
+                {% for staff in warpers %}
+                    <option value="{{ staff.user.id }}">{{ staff.user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Warp Name</label>
+            <input type="text" name="name" id="name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="meters" class="form-label">Meters</label>
+            <input type="number" name="meters" id="meters" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="warp_wage" class="form-label">warp wage per meter</label>
+            <input type="number" name="warp_wage" id="warp_wage" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="warp_yarn" class="form-label">warp yarn per 100 meter per 100 yarns</label>
+            <input type="number" name="warp_yarn" id="warp_yarn" class="form-control" step="any" required>
+        </div>
+        <div class="mb-3">
+            <label for="date_start_warper" class="form-label">Start Date (Warper)</label>
+            <input type="date" name="date_start_warper" id="date_start_warper" class="form-control">
+        </div>
+        <button type="submit">Make Warp</button>
+
+
+    </form>
+</div>
+{% endblock %}

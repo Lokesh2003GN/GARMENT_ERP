@@ -1,0 +1,156 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+
+<h1>Transactions</h1>
+
+{% if not request.user.staff %}
+  <form method="get" action="" id="weaver_form">
+    <label>Select Weaver:</label>
+    <select name="weaver_id" onchange="this.form.submit()" required>
+      <option value="">-- Select Weaver --</option>
+      {% for weaver in weavers %}
+        <option value="{{ weaver.user.id }}" {% if request.GET.weaver_id == weaver.user.id|stringformat:"s" %}selected{% endif %}>
+          {{ weaver.user.username }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+{% endif %}
+
+<!-- Add Wage Button (same style as home page) -->
+<div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
+  <a href="/add_wage/" class="add-btn" style="padding: 10px 24px; font-size: 1rem; border-radius: 8px; background: #43a047; color: #fff; text-decoration: none; font-weight: 600; box-shadow: 0 2px 8px rgba(67,160,71,0.10);">
+    <i class="fas fa-plus"></i> Add Wage
+  </a>
+</div>
+
+<table border="1" cellpadding="5" class="note-table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Note</th>
+      <th>Wage</th>
+      <th>Money</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in combined_data %}
+  <tr 
+  class="{% if item.isDebite %}debit-row{% else %}credit-row{% endif %}"
+  {% if request.user.type == "owner" or item.isDebite %}
+    style="cursor: pointer;"
+    onclick="handleTransactionClick('{{ item.date }}', '{{ item.warp }}', '{{ item.piece_wage }}', {{ item.isDebite|yesno:"true,false" }}, {{ item.id }})"
+  {% endif %}
+>
+
+    <td>{{ item.date }}</td>
+    <td>
+      {% if item.isDebite %}
+        
+      {% else %}
+        {{ item.note }}
+      {% endif %}
+    </td>
+    {% if item.isDebite %}
+      <td class="Debit">{{ item.amount }}</td>
+      <td></td>
+    {% else %}
+      <td></td>
+      <td class="Credit">{{ item.amount }}</td>
+    {% endif %}
+    <td class="Balance">0</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+
+<div id="popup-container" style="display:none;">  
+  <button id="close-btn" onclick="closePopup()" style="float:right; font-size: 20px;">X</button>  
+  <div id="popup-content"></div>
+</div>  
+
+<script>
+  const userType = "{{ request.user.type }}";
+  const userId = "{{ request.user.id }}";
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const rows = Array.from(document.querySelectorAll('.note-table tbody tr')).reverse();
+  let balance = 0;
+
+  rows.forEach(row => {
+    const debitCell = row.querySelector('.Debit');
+    const creditCell = row.querySelector('.Credit');
+    const balanceCell = row.querySelector('.Balance');
+
+    const debit = debitCell ? parseFloat(debitCell.textContent) || 0 : 0;
+    const credit = creditCell ? parseFloat(creditCell.textContent) || 0 : 0;
+
+    balance += credit - debit;
+    balanceCell.textContent = balance.toFixed(2);
+  });
+});
+
+
+function closePopup() {
+  document.getElementById('popup-container').style.display = 'none';
+  document.getElementById('popup-content').innerHTML = '';
+}
+
+window.calculatePopupTable = function () {
+  const table = document.querySelector('#popup-content .note-table');
+  if (!table) return;
+
+  let totalCount = 0;
+  let totalMeter = 0;
+  let totalWage = 0;
+
+  table.querySelectorAll('tbody tr').forEach(row => {
+    const count = parseFloat(row.querySelector('.count')?.innerText.trim()) || 0;
+    const meter = parseFloat(row.querySelector('.meter')?.innerText.trim()) || 0;
+    const wage = parseFloat(row.querySelector('.wage')?.innerText.trim()) || 0;
+
+    const kpmCell = row.querySelector('.wage-per-meter');
+    if (kpmCell) {
+      kpmCell.innerText = meter ? (wage / meter).toFixed(2) : '0.00';
+    }
+
+    totalCount += count;
+    totalMeter += meter;
+    totalWage += wage;
+  });
+
+  table.querySelector('.total-count').innerText = totalCount.toFixed(2);
+  table.querySelector('.total-meter').innerText = totalMeter.toFixed(2);
+  table.querySelector('.total-wage').innerText = totalWage.toFixed(2);
+};
+
+function handleTransactionClick(date, warp, piece_wage, isDebite, id) {
+  if (!isDebite) {
+    const url = `/change_wage/${id}/`;
+    const popup = window.open(url, 'Edit Note', 'width=600,height=400,scrollbars=yes');
+    if (window.focus) popup.focus();
+  } else {
+    let weaver_id = '';
+
+    if (userType === "owner") {
+      weaver_id = document.querySelector('[name="weaver_id"]')?.value || '';
+    } else {
+      weaver_id = userId;
+    }
+
+    fetch(`/get-transaction-details/?date=${date}&weaver_id=${weaver_id}`)
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('popup-content').innerHTML = html;
+        document.getElementById('popup-container').style.display = 'block';
+        calculatePopupTable();
+      });
+  }
+}
+
+
+</script>
+{% endblock %}

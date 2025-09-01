@@ -1,0 +1,191 @@
+{% extends 'core/blocks/base.html' %}
+{% block title %}Warp List{% endblock %}
+
+{% block content %}
+<h2>🧵 Not Warped List</h2>
+<table border="1" cellspacing="0" cellpadding="8" class="note-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Design</th>
+            <th>Warper</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for warp in not_warped %}
+        <tr onclick="window.location.href='{% url 'edit_warp' warp.id %}'" style="cursor:pointer;">
+            <td>{{ warp.name }}</td>
+            <td>{{ warp.design }}</td>
+            <td>{{ warp.warper.username }}</td>
+            <td>
+                <button onclick="event.stopPropagation(); completeWarping({{ warp.id }})" class='add-btn'>Complete Warping</button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No pending warps.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>🧶 Warping Completed but Not Given to Weaving</h2>
+<table border="1" cellspacing="0" cellpadding="8" class="note-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Design</th>
+            <th>Warper</th>
+            <th>Assign Weaver</th>
+            <th>Secondary Warps</th>  <!-- 🔥 New Column -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for warp in warped_not_weaving %}
+        <tr onclick="window.location.href='{% url 'edit_warp' warp.id %}'" style="cursor:pointer;">
+            <td>{{ warp.name }}</td>
+            <td>{{ warp.design }}</td>
+            <td>{{ warp.warper.username }}</td>
+            <td>
+                <a href="{% url 'assign_weaver' warp.id %}" class="button add-btn" onclick="event.stopPropagation();">Assign Weaver</a>
+                {% if not warp.isSecondary and not warp.secondary_warps.all %}
+    <button onclick="event.stopPropagation(); makeSecondary({{ warp.id }})" class="add-btn" style="background-color: #f39c12;">Make Secondary</button>
+{% elif warp.isSecondary %}
+    <span style="color: #27ae60;">Secondary</span>
+{% elif warp.secondary_warps.all %}
+    <span style="color: #999;">Has Secondaries</span>
+{% endif %}
+
+            </td>
+            <td>
+                {% if warp.secondary_warps.all %}
+                    {% for sec in warp.secondary_warps.all %}
+                        <span style="display: inline-block; background: #eef; padding: 2px 6px; margin: 2px; border-radius: 4px;">
+                            {{ sec.name }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <em>None</em>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No warps pending weaving.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<h2>🪡 Warps in Weaving</h2>
+<table border="1" cellspacing="0" cellpadding="8" class="note-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Design</th>
+            <th>Weaver</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for warp in in_weaving %}
+        <tr onclick="window.location.href='{% url 'edit_warp' warp.id %}'" style="cursor:pointer;">
+            <td>{{ warp.name }}</td>
+            <td>{{ warp.design }}</td>
+            <td>{{ warp.weaver.username }}</td>
+            <td>
+                <button onclick="event.stopPropagation(); completeWeaving({{ warp.id }})" class='add-btn'>Complete Weaving</button>
+            {% if warp.isSecondary %}
+            <span style="color: #27ae60;">Secondary for {{ warp.secondary_for.username }}</span>
+            {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No warps in weaving.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>✅ Completed Warps</h2>
+<table border="1" cellspacing="0" cellpadding="8" class="note-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Design</th>
+            <th>Warper</th>
+            <th>Weaver</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for warp in completed_warps %}
+        <tr onclick="window.location.href='{% url 'edit_warp' warp.id %}'" style="cursor:pointer;">
+            <td>{{ warp.name }}</td>
+            <td>{{ warp.design }}</td>
+            <td>{{ warp.warper.username }}</td>
+            <td>{{ warp.weaver.username }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No completed warps.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    async function getCSRFToken() {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            if (cookie.trim().startsWith('csrftoken=')) {
+                return cookie.trim().split('=')[1];
+            }
+        }
+        return '';
+    }
+
+    async function completeWarping(warpId) {
+        const csrfToken = await getCSRFToken();
+        const response = await fetch(`{% url 'complete_warping' 0 %}`.replace('/0/', `/${warpId}/`), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+        });
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Failed to complete warping.');
+        }
+    }
+
+    async function completeWeaving(warpId) {
+        const csrfToken = await getCSRFToken();
+        const response = await fetch(`{% url 'complete_weaving' 0 %}`.replace('/0/', `/${warpId}/`), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+        });
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Failed to complete weaving.');
+        }
+    }
+
+
+    async function makeSecondary(warpId) {
+    const csrfToken = await getCSRFToken();
+    const response = await fetch(`{% url 'make_secondary' 0 %}`.replace('/0/', `/${warpId}/`), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        },
+    });
+    if (response.ok) {
+        location.reload();
+    } else {
+        alert('Failed to mark as secondary.');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'core/blocks/base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Edit Piece</h2>
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Date:</label>
+    <input type="date" name="date" value="{{ piece.date|date:'Y-m-d' }}" required><br>
+
+    <label for="weaver_select">Select Weaver:</label>
+    <select id="weaver_select" name="weaver_id" required>
+        <option value="">-- Select Weaver --</option>
+        {% for weaver in weavers %}
+            <option value="{{ weaver.user.username }}" {% if weaver.user.username == piece.warp.weaver.username %}selected{% endif %}>
+                {{ weaver.user.username }}
+            </option>
+        {% endfor %}
+    </select><br>
+
+    <label>Warp:</label>
+    <select name="warp_id" class="warp-select" required onchange="updateLength(this)">
+        <option value="">-- Select Warp --</option>
+        {% for warp in warp_list %}
+            {% if not warp.isComplected %}
+                <option value="{{ warp.id }}"
+                        data-weaver="{{ warp.weaver.username }}"
+                        data-length="{{ warp.length }}"
+                        {% if warp.id == piece.warp.id %}selected{% endif %}>
+                    {{ warp.name }} | {{ warp.weaver.username }}
+                </option>
+            {% endif %}
+        {% endfor %}
+    </select><br>
+
+    <label>Length:</label>
+    <input type="number" step="0.01" name="length"  value="{{ piece.length }}" required><br>
+
+    <label>Count:</label>
+    <input type="number" step="0.01" name="count" value="{{ piece.count }}" required><br>
+
+    <label>Type:</label>
+    <select name="type" required>
+        <option value="good" {% if piece.type == 'good' %}selected{% endif %}>Good</option>
+        <option value="demage" {% if piece.type == 'demage' %}selected{% endif %}>Damage</option>
+        <option value="return" {% if piece.type == 'return' %}selected{% endif %}>Return</option>
+        <option value="extra" {% if piece.type == 'extra' %}selected{% endif %}>Extra</option>
+    </select><br>
+
+    <button type="submit">Save</button>
+    <button type="submit" name="delete" value="1">Delete</button>
+</form>
+
+<script>
+  const weaverSelect = document.getElementById('weaver_select');
+
+  weaverSelect.addEventListener('change', function () {
+    const selectedWeaver = this.value;
+
+    document.querySelectorAll('.warp-select').forEach(select => {
+      Array.from(select.options).forEach(option => {
+        if (option.value === "") {
+          option.style.display = 'block';
+        } else {
+          option.style.display = (option.dataset.weaver === selectedWeaver) ? 'block' : 'none';
+        }
+      });
+      select.selectedIndex = 0;
+      updateLength(select);
+    });
+  });
+
+  function updateLength(selectElement) {
+    const selectedOption = selectElement.selectedOptions[0];
+    const length = selectedOption ? selectedOption.dataset.length : '';
+    const lengthInput = document.querySelector('.length-input');
+    lengthInput.value = length || '';
+  }
+
+  // On page load
+  window.onload = function () {
+    document.querySelectorAll('.warp-select').forEach(select => {
+      const selectedWeaver = weaverSelect.value;
+      Array.from(select.options).forEach(option => {
+        if (option.value === "") {
+          option.style.display = 'block';
+        } else {
+          option.style.display = (option.dataset.weaver === selectedWeaver) ? 'block' : 'none';
+        }
+      });
+      updateLength(select);
+    });
+  };
+</script>
+{% endblock %}
