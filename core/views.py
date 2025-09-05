@@ -305,7 +305,6 @@ def assign_weaver(request, warp_id):
         weaver = get_object_or_404(CustomUser, id=weaver_id)
 
         warp.weaver = weaver
-        warp.meters = request.POST.get('meters')
         warp.date_start_weaver = request.POST.get('date_start_weaver')
         warp.length = request.POST.get('length')
         warp.save()
@@ -981,12 +980,14 @@ def create_yarn(request):
     if request.method == 'POST':
         company = get_object_or_404(Company, owner=request.user)
         color = request.POST.get('color')
+        color_code = request.POST.get('color_code')
         count = request.POST.get('count')
 
         Yarn.objects.create(
             company=company,
             color=color,
-            count=count
+            count=count,
+            color_code=color_code
         )
 
         messages.success(request, "Yarn created successfully.")
@@ -1054,7 +1055,7 @@ def give_yarn(request):
 
             else:
                 warp_instance = None
-                to = None
+                to = 'owner'
 
             Yarn_Transactions.objects.create(
                 yarn=yarn,

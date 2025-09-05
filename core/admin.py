@@ -80,7 +80,7 @@ class YarnAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('company', 'color', 'count')
+            'fields': ('company', 'color', 'count', 'color_code')
         }),
     )
 

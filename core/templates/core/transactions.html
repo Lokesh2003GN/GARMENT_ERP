@@ -141,7 +141,25 @@ function handleTransactionClick(date, warp, piece_wage, isDebite, id) {
       weaver_id = userId;
     }
 
-    fetch(`/get-transaction-details/?date=${date}&weaver_id=${weaver_id}`)
+    // Convert date to YYYY-MM-DD format if possible
+    let formattedDate = date;
+    // Try to parse common formats
+    if (date) {
+      // If already YYYY-MM-DD, use as is
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        formattedDate = date;
+      } else {
+        // Try to parse with Date object
+        const d = new Date(date);
+        if (!isNaN(d.getTime())) {
+          // Pad month and day
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          formattedDate = `${d.getFullYear()}-${month}-${day}`;
+        }
+      }
+    }
+    fetch(`/get-transaction-details/?date=${formattedDate}&weaver_id=${weaver_id}`)
       .then(response => response.text())
       .then(html => {
         document.getElementById('popup-content').innerHTML = html;

@@ -28,7 +28,13 @@
     {% for transaction in yarn_transactions %}
         <tr onclick="editYarn({{ transaction.id }})">
             <td>{{ transaction.date }}</td>
-            <td>{{ transaction.quantity }}</td>
+                <td>
+                    {% if transaction.transaction_type == 'buy' %}
+                        <span style="color: green; font-weight: bold;">+{{ transaction.quantity }}</span>
+                    {% else %}
+                        <span style="color: red; font-weight: bold;">-{{ transaction.quantity }}</span>
+                    {% endif %}
+                </td>
             <td>
                 {% if transaction.transaction_type == 'buy' %}
                     {{ transaction.note }}

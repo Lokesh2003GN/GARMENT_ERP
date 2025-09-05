@@ -45,6 +45,7 @@ class Yarn(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     color = models.CharField(null=True, blank=False, max_length=150)
     count = models.FloatField()
+    color_code = models.CharField(null=True, blank=True, max_length=7)
 
     def __str__(self):
         return f"{self.color} ({self.count}s)"

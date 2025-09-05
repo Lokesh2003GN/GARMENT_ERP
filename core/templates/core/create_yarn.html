@@ -6,9 +6,9 @@
     {% csrf_token %}
     <label for="color">Color</label>
     <input type="text" name="color" id="color" required>
-    
+    <label for="color_picker">Pick Color</label>
+    <input type="color" name="color_picker" id="color_picker" value="">
     <label for="count">Count</label>
     <input type="number" name="count" id="count" required>
-    
     <button type="submit">Create Yarn</button>
 {% endblock %}

@@ -515,3 +515,22 @@ input[type="checkbox"]:hover {
   gap: 12px;
   align-items: center;
 }
+
+textarea {
+    width: 95%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #b0bec5;
+    background-color: #e3f2fd;
+    margin-bottom: 10px;
+    font-size: 20px;
+    box-sizing: border-box;
+    resize: vertical;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    outline: none;
+}
+textarea:focus {
+    box-shadow: 0 0 0 2px #42a5f5;
+    border-color: #42a5f5;
+    background-color: #fff;
+}

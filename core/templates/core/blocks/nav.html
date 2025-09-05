@@ -10,12 +10,25 @@
   </div>
   <ul class="nav-list" id="menu">
     <li><button class="close-btn" id="closeBtn">×</button></li>
-    <li><a href="/" class="nav-link active"><i class="fas fa-home"></i> Home</a></li>
-    <li><a href="/yarn_management" class="nav-link"><i class="fas fa-cut"></i> Yarn</a></li>
-    <li><a href="/warp_management" class="nav-link"><i class="fas fa-cut"></i> Warps</a></li>
-    <li><a href="/piece_management" class="nav-link"><i class="fas fa-cut"></i> Piece</a></li>
-    <li><a href="/transactions" class="nav-link"><i class="fas fa-money-bill-wave"></i> Txns</a></li>
-    <li><a href="/account" class="nav-link"><i class="fas fa-user-circle"></i> Account</a></li>
+    <li><a href="/" class="nav-link active">Home</a></li>
+    {% if  request.user.staff.role == 'weaver' %}
+    <li><a href="/date_wise/" class="nav-link">Date-wise</a></li>
+    <li><a href="/warp_wise/" class="nav-link">Warp-wise</a></li>
+    <li><a href="/warp_wise_yarn_list" class="nav-link">Warp-wise Yarn List</a></li>
+    {% endif %}
+    {% if request.user.staff.role == 'warper' %}
+    <li><a href="/warp_wise_yarn_list" class="nav-link">Warp-wise Yarn List</a></li>
+    <li><a href="/warp_list_warper" class="nav-link">Warp List</a></li>
+    {% endif %}
+    {% if request.user.is_owner %}  
+    <li><a href="/yarn_management" class="nav-link">Yarn</a></li>
+    <li><a href="/warp_management" class="nav-link">Warp</a></li>
+    <li><a href="/piece_management" class="nav-link">Piece</a></li>
+    <li><a href="/staff_management" class="nav-link">Staff</a></li>
+    {% endif %}
+    <li><a href="/transactions" class="nav-link">Transactions</a></li>
+    <li><a href="/account" class="nav-link">Account</a></li>
+
   </ul>
 </nav>
 <script>

@@ -11,6 +11,7 @@
 </head>
 <body>      
         
+
 <div class="login-container">
     <h2>Login to Garment ERP</h2>
     <form method="POST" action="{% url 'user_login' %}">
@@ -28,6 +29,23 @@
     <div class="register-link">
         <p>Don't have an account? <a href="{% url 'register_owner' %}">Register here</a></p>
     </div>
+</div>
+
+
+<!-- Demo Credentials Section -->
+<div style="background: #f0f0f0; border: 1px solid #ccc; padding: 16px; margin-bottom: 24px; border-radius: 8px; max-width: 400px; margin-left: auto; margin-right: auto;">
+    <h4>Demo Login Credentials</h4>
+    <ul>
+        <li><strong>Owner Demo Account:</strong><br>
+            Username: <code>Demo</code><br>
+            Password: <code>Demo@123</code>
+        </li>
+        <li><strong>Staff Demo Accounts:</strong><br>
+            Weaver Username: <code>D_Weaver-1</code><br>
+            Warper Username: <code>D_Warper-1</code><br>
+            Password (for both): <code>Demo@123</code>
+        </li>
+    </ul>
 </div>
 
 </body>
